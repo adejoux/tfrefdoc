@@ -35,15 +35,21 @@ tfrefdoc reference --schema build/schema.json
 tfplugindocs validate
 ```
 
-or, with `go generate ./...`:
+or, with `go generate ./...`, without adding the tools to the provider's
+`go.mod` (`go run` with a `@version` suffix downloads and runs the tool
+independently of the current module):
 
 ```go
-//go:generate go run github.com/adejoux/tfrefdoc schema -o build/schema.json
-//go:generate go run github.com/adejoux/tfrefdoc examples --schema build/schema.json
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --providers-schema build/schema.json
-//go:generate go run github.com/adejoux/tfrefdoc reference --schema build/schema.json
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs validate
+//go:generate go run github.com/adejoux/tfrefdoc@v0.1.0 schema -o build/schema.json
+//go:generate go run github.com/adejoux/tfrefdoc@v0.1.0 examples --schema build/schema.json
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest generate --providers-schema build/schema.json
+//go:generate go run github.com/adejoux/tfrefdoc@v0.1.0 reference --schema build/schema.json
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest validate
 ```
+
+Pin the versions for reproducible builds. If you prefer to track the tools
+in the provider's `go.mod` (the `tools.go` pattern), drop the `@version`
+suffixes.
 
 When a new resource is added, `tfrefdoc examples` creates a skeleton
 starting with a `# TODO(tfrefdoc):` line. Replace the placeholder values by a
