@@ -1,0 +1,5 @@
+/tfrefdoc
+/build/
+/dist/
+*.test
+*.out

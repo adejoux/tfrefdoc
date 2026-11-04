@@ -1,0 +1,316 @@
+{
+  "format_version": "1.0",
+  "provider_schemas": {
+    "registry.terraform.io/hashicorp/acme": {
+      "data_source_schemas": {
+        "acme_servers": {
+          "block": {
+            "attributes": {
+              "id": {
+                "computed": true,
+                "description_kind": "markdown",
+                "type": "string"
+              },
+              "network_id": {
+                "description": "Only return servers of this network.",
+                "description_kind": "markdown",
+                "optional": true,
+                "type": "string"
+              },
+              "servers": {
+                "computed": true,
+                "description": "Servers found.",
+                "description_kind": "markdown",
+                "type": [
+                  "list",
+                  [
+                    "object",
+                    {
+                      "disks": [
+                        "list",
+                        [
+                          "object",
+                          {
+                            "size_gb": "number"
+                          }
+                        ]
+                      ],
+                      "id": "string",
+                      "name": "string"
+                    }
+                  ]
+                ]
+              }
+            },
+            "description_kind": "plain"
+          },
+          "version": 0
+        }
+      },
+      "provider": {
+        "block": {
+          "attributes": {
+            "api_key": {
+              "description": "API key.",
+              "description_kind": "markdown",
+              "optional": true,
+              "sensitive": true,
+              "type": "string"
+            },
+            "endpoint": {
+              "description": "API endpoint.",
+              "description_kind": "markdown",
+              "optional": true,
+              "type": "string"
+            }
+          },
+          "description_kind": "plain"
+        },
+        "version": 0
+      },
+      "resource_schemas": {
+        "acme_network": {
+          "block": {
+            "attributes": {
+              "cidr_block": {
+                "description": "Network CIDR.",
+                "description_kind": "markdown",
+                "optional": true,
+                "type": "string"
+              },
+              "id": {
+                "computed": true,
+                "description": "Network identifier.",
+                "description_kind": "markdown",
+                "type": "string"
+              },
+              "name": {
+                "description_kind": "markdown",
+                "required": true,
+                "type": "string"
+              }
+            },
+            "description_kind": "plain"
+          },
+          "version": 0
+        },
+        "acme_server": {
+          "block": {
+            "attributes": {
+              "disks": {
+                "description": "Attached disks.",
+                "description_kind": "markdown",
+                "nested_type": {
+                  "attributes": {
+                    "encrypted": {
+                      "description": "Encrypt the disk.",
+                      "description_kind": "markdown",
+                      "optional": true,
+                      "type": "bool"
+                    },
+                    "size_gb": {
+                      "description": "Disk size in GB.\n\nMust be a multiple of 10.",
+                      "description_kind": "markdown",
+                      "required": true,
+                      "type": "number"
+                    }
+                  },
+                  "nesting_mode": "list"
+                },
+                "required": true
+              },
+              "id": {
+                "computed": true,
+                "description": "Server identifier.",
+                "description_kind": "markdown",
+                "type": "string"
+              },
+              "legacy_mode": {
+                "deprecated": true,
+                "description": "Deprecated. Use `settings` instead.",
+                "description_kind": "markdown",
+                "optional": true,
+                "type": "bool"
+              },
+              "name": {
+                "description": "Server name.",
+                "description_kind": "markdown",
+                "required": true,
+                "type": "string"
+              },
+              "network_id": {
+                "description": "ID of the network to attach the server to.",
+                "description_kind": "markdown",
+                "required": true,
+                "type": "string"
+              },
+              "password": {
+                "description": "Administrator password.",
+                "description_kind": "markdown",
+                "optional": true,
+                "sensitive": true,
+                "type": "string"
+              },
+              "settings": {
+                "description": "Advanced settings.",
+                "description_kind": "markdown",
+                "nested_type": {
+                  "attributes": {
+                    "backup": {
+                      "description": "Backup policy.",
+                      "description_kind": "markdown",
+                      "nested_type": {
+                        "attributes": {
+                          "retention_days": {
+                            "description": "Days to keep backups.",
+                            "description_kind": "markdown",
+                            "optional": true,
+                            "type": "number"
+                          },
+                          "schedule": {
+                            "description_kind": "markdown",
+                            "nested_type": {
+                              "attributes": {
+                                "cron": {
+                                  "description": "Cron expression.",
+                                  "description_kind": "markdown",
+                                  "required": true,
+                                  "type": "string"
+                                },
+                                "timezone": {
+                                  "description_kind": "markdown",
+                                  "optional": true,
+                                  "type": "string"
+                                }
+                              },
+                              "nesting_mode": "single"
+                            },
+                            "optional": true
+                          }
+                        },
+                        "nesting_mode": "single"
+                      },
+                      "optional": true
+                    }
+                  },
+                  "nesting_mode": "single"
+                },
+                "optional": true
+              },
+              "size": {
+                "computed": true,
+                "description": "Server size. One of `small`, `medium`, `large`. Defaults to `small`.",
+                "description_kind": "markdown",
+                "optional": true,
+                "type": "string"
+              },
+              "status": {
+                "computed": true,
+                "description": "Runtime status.",
+                "description_kind": "markdown",
+                "nested_type": {
+                  "attributes": {
+                    "ip_address": {
+                      "computed": true,
+                      "description_kind": "markdown",
+                      "type": "string"
+                    },
+                    "state": {
+                      "computed": true,
+                      "description": "Current state.",
+                      "description_kind": "markdown",
+                      "type": "string"
+                    }
+                  },
+                  "nesting_mode": "single"
+                }
+              },
+              "tags": {
+                "description": "Tags applied to the server.",
+                "description_kind": "markdown",
+                "optional": true,
+                "type": [
+                  "map",
+                  "string"
+                ]
+              }
+            },
+            "block_types": {
+              "label": {
+                "block": {
+                  "attributes": {
+                    "value": {
+                      "description_kind": "markdown",
+                      "required": true,
+                      "type": "string"
+                    }
+                  }
+                },
+                "nesting_mode": "map"
+              },
+              "rule": {
+                "block": {
+                  "attributes": {
+                    "port": {
+                      "description": "Port.",
+                      "description_kind": "markdown",
+                      "required": true,
+                      "type": "number"
+                    },
+                    "protocol": {
+                      "description": "Valid values are `tcp` and `udp`.",
+                      "description_kind": "markdown",
+                      "optional": true,
+                      "type": "string"
+                    }
+                  },
+                  "block_types": {
+                    "source": {
+                      "block": {
+                        "attributes": {
+                          "cidr": {
+                            "description": "Source CIDR.",
+                            "description_kind": "markdown",
+                            "required": true,
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "max_items": 5,
+                      "nesting_mode": "set"
+                    }
+                  },
+                  "description": "Firewall rule.",
+                  "description_kind": "plain"
+                },
+                "min_items": 1,
+                "nesting_mode": "list"
+              },
+              "timeouts": {
+                "block": {
+                  "attributes": {
+                    "create": {
+                      "description": "Timeout for creation, e.g. `30m`.",
+                      "description_kind": "markdown",
+                      "optional": true,
+                      "type": "string"
+                    },
+                    "delete": {
+                      "description_kind": "markdown",
+                      "optional": true,
+                      "type": "string"
+                    }
+                  }
+                },
+                "nesting_mode": "single"
+              }
+            },
+            "description": "Manages a server.",
+            "description_kind": "markdown"
+          },
+          "version": 0
+        }
+      }
+    }
+  }
+}
