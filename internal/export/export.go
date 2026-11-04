@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -47,6 +48,8 @@ func Schema(ctx context.Context, w io.Writer, opts Options) error {
 			return err
 		}
 		opts.Name = name
+	} else if err := ValidateName(opts.Name); err != nil {
+		return err
 	}
 
 	tmp, err := os.MkdirTemp("", "tfrefdoc-schema-")
@@ -103,18 +106,45 @@ func nameFromGoMod(dir string) (string, error) {
 	for sc.Scan() {
 		fields := strings.Fields(sc.Text())
 		if len(fields) == 2 && fields[0] == "module" {
-			mod := fields[1]
-			base := mod[strings.LastIndex(mod, "/")+1:]
-			// Major version suffix: github.com/x/terraform-provider-foo/v2.
-			if len(base) >= 2 && base[0] == 'v' && strings.Trim(base[1:], "0123456789") == "" {
-				rest := strings.TrimSuffix(mod, "/"+base)
-				base = rest[strings.LastIndex(rest, "/")+1:]
-			}
-			if name, ok := strings.CutPrefix(base, "terraform-provider-"); ok {
-				return name, nil
-			}
-			return "", fmt.Errorf("module %q is not named terraform-provider-<name>: use --name", mod)
+			return nameFromModule(strings.Trim(fields[1], `"`+"`"))
 		}
 	}
 	return "", fmt.Errorf("no module directive in go.mod: use --name")
+}
+
+// nameFromModule derives the provider short name from a module path:
+//
+//	github.com/acme/terraform-provider-foo          → foo
+//	github.com/acme/terraform-provider-foo/v2       → foo
+//	gitlab.example.com/acme/terraform-provider-foo.git    → foo
+//	gitlab.example.com/acme/terraform-provider-foo.git/v2 → foo
+func nameFromModule(mod string) (string, error) {
+	parts := strings.Split(mod, "/")
+	base := parts[len(parts)-1]
+	// Major version suffix.
+	if len(parts) > 1 && len(base) >= 2 && base[0] == 'v' && strings.Trim(base[1:], "0123456789") == "" {
+		base = parts[len(parts)-2]
+	}
+	// VCS qualifier required by some hosts (GitLab subgroups, private
+	// servers): gitlab.example.com/group/terraform-provider-foo.git.
+	base = strings.TrimSuffix(base, ".git")
+	name, ok := strings.CutPrefix(base, "terraform-provider-")
+	if !ok {
+		return "", fmt.Errorf("module %q is not named terraform-provider-<name>: use --name", mod)
+	}
+	if err := ValidateName(name); err != nil {
+		return "", fmt.Errorf("module %q: %w: use --name", mod, err)
+	}
+	return name, nil
+}
+
+var nameRe = regexp.MustCompile(`^[a-z][a-z0-9-]*$`)
+
+// ValidateName checks that a provider short name is usable in a provider
+// address: lowercase letters, digits and dashes.
+func ValidateName(name string) error {
+	if !nameRe.MatchString(name) {
+		return fmt.Errorf("invalid provider name %q (lowercase letters, digits and dashes only)", name)
+	}
+	return nil
 }
